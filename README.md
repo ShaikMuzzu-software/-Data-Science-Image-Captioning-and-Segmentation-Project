@@ -1,78 +1,86 @@
-# Image Captioning and Segmentation Project
+# Image Captioning + Segmentation (Streamlit App + Training Scaffolding)
 
-## Project Overview
+An end‑to‑end project that **generates captions** for images and **segments objects** in the same UI.
+- Captioning uses a **pretrained BLIP** model (via 🤗 `transformers`) for instant results.
+- Segmentation uses **Mask R‑CNN (ResNet‑50 FPN)** from `torchvision` (pretrained on COCO).
+- Includes a **Streamlit app**, modular `src/` code, and **training scaffolding** to extend later.
 
-This project addresses the dual challenge of Image Captioning and Image Segmentation, combining computer vision and natural language processing techniques. Image Captioning generates human-like descriptive captions for images, while Image Segmentation labels pixels of an image to identify objects and regions. Together, these tasks provide comprehensive scene understanding.
+> You can demo everything without training by using the pretrained models included via libraries.
 
-## Tech Stack & Tools
+---
 
-- Python  
-- TensorFlow / PyTorch for model building and training  
-- OpenCV for image processing  
-- NLTK / spaCy for text preprocessing  
-- Flask / Streamlit for serving models as web applications  
-- Jupyter Notebook for experimentation and prototyping
+## Quickstart (Windows/Mac/Linux)
 
-## Dataset
+### 0) Create & activate a Python environment (recommended)
+Using Conda:
+```bash
+conda create -n imgcap python=3.10 -y
+conda activate imgcap
+```
 
-Public datasets such as [MS COCO](https://cocodataset.org/) or [Pascal VOC](http://host.robots.ox.ac.uk/pascal/VOC/) are used. These datasets contain thousands of images with annotations for both segmentation masks and captioning text.
+### 1) Install dependencies
+```bash
+pip install -r requirements.txt
+```
 
-## Project Setup
+> If you have an NVIDIA GPU and want acceleration, install PyTorch with CUDA from https://pytorch.org/get-started/locally/ first, then run `pip install -r requirements.txt` for the rest.
 
-1. Clone the repository.
-2. Install necessary Python dependencies using:
-3. Download dataset(s) and place them in the appropriate data folders.
-4. Setup environment variables and paths as per config files.
-5. Run data preprocessing scripts to prepare images and captions.
-6. Train captioning and segmentation models separately.
-7. Test models on validation data and tune hyperparameters.
-8. Integrate models and build combined inference pipeline.
+### 2) Run the Streamlit app
+```bash
+streamlit run app/streamlit_app.py
+```
+Then open the local URL shown (usually http://localhost:8501).
 
-## Model Descriptions
+### 3) Try it out
+- Upload any JPG/PNG image.
+- Click **Generate Caption** to get a BLIP caption.
+- Click **Run Segmentation** to see instance masks and detected classes.
+- Use the **Confidence** slider to filter detections.
 
-- **Image Captioning:**  
-Deep learning models built using CNN encoders (like ResNet, VGG) combined with LSTM or Transformer-based decoders to generate sequential textual descriptions.
+> If the first run is slow, it’s downloading the models. Subsequent runs are much faster.
 
-- **Image Segmentation:**  
-Semantic segmentation models like U-Net or Mask R-CNN designed to produce pixel-wise labels, enabling identification of multiple object classes in images.
+---
 
-## Integration and Deployment
+## Project Structure
 
-- Models trained separately and then integrated into a single inference pipeline.
-- Deployment via REST APIs using Flask or interactive UIs using Streamlit.
-- Model performance benchmarking and latency tests before deployment.
-- Option to deploy on cloud platforms such as AWS, GCP, or Azure.
+```
+image_caption_seg_project/
+├── app/
+│   ├── streamlit_app.py          # Main UI
+│   └── demo_images/              # (Optional) place a few images here for quick tests
+├── src/
+│   ├── captioning.py             # BLIP captioning module
+│   ├── segmentation.py           # Mask R-CNN inference module
+│   └── utils.py                  # Helpers (image I/O, plotting)
+├── training/
+│   ├── caption_train.py          # (Scaffold) Caption training on COCO (advanced)
+│   └── segmentation_finetune.py  # (Scaffold) Finetune Mask R-CNN on VOC/COCO
+├── notebooks/
+│   └── exploration.ipynb         # (Empty) Put your EDA or experiments here
+├── data/                         # Put datasets here if training locally
+├── requirements.txt
+└── README.md
+```
 
-## Timeline & Milestones
+---
 
-| Week | Tasks                                               |
-|-------|----------------------------------------------------|
-| 1-2   | Literature review and dataset familiarization      |
-| 3-4   | Setup environment and data preprocessing           |
-| 5-6   | Train image captioning models                        |
-| 7-8   | Train image segmentation models                      |
-| 9     | Integrate captioning and segmentation models        |
-| 10-12 | Refine, test, and deploy the final system           |
+## Optional: Datasets for Training
 
-## Expected Deliverables
+You **do not** need datasets to demo the app with pretrained models. If you want to train:
 
-- Fully functional and documented codebase on GitHub.
-- Research and methodology report detailing approaches.
-- Web-based demo or application for showcasing model capabilities.
-- Presentation and walkthrough video summarizing the project.
+- **COCO 2017 (captions + instances)**  
+  - Train images: http://images.cocodataset.org/zips/train2017.zip  
+  - Val images: http://images.cocodataset.org/zips/val2017.zip  
+  - Annotations: http://images.cocodataset.org/annotations/annotations_trainval2017.zip
 
-## Challenges & Considerations
+- **Pascal VOC 2012 (segmentation)**  
+  - Train/Val: http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar
 
-- Managing large dataset download and storage.
-- Balancing captioning accuracy with segmentation granularity.
-- Ensuring model inference efficiency for deployment.
-- Handling ambiguous or complex scenes in images.
-- Text preprocessing challenges including tokenization and vocabulary management.
+Extract them under `data/` following typical layouts (COCO: `data/coco/...`, VOC: `data/voc/VOCdevkit/VOC2012/...`).
 
-## Future Work
+---
 
-- Explore Transformer-only architectures for captioning like Vision Transformers.
-- Use instance segmentation for finer object detection.
-- Incorporate attention mechanisms for improved contextual understanding.
-- Build multilingual captioning models to support other languages.
-- Optimize models for mobile and edge device deployment.
+## Notes
+- First use will download BLIP and Mask R-CNN weights automatically.
+- For CPU‑only systems, it works out of the box (slower). For GPU, ensure the right CUDA PyTorch build.
+- The training scripts are **scaffolds** intended for customization; they sketch the loops and dataset usage.
